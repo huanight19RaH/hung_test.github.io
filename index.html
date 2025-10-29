@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Coffee Database Project</title>
-    <meta name="description" content="Coffee data collection, scraping, processing, and analysis system (ADY 201)." />
+    <title>Coffee News & Insights</title>
+    <meta name="description" content="Latest coffee news, prices, market insights, and interactive charts." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -60,6 +60,7 @@
         .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
         .col-4 { grid-column: span 4; }
         .col-8 { grid-column: span 8; }
+        .col-6 { grid-column: span 6; }
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
         h2 { margin: 0 0 10px; font-size: 22px; }
         h3 { margin: 14px 0 8px; font-size: 16px; color: var(--muted); font-weight: 600; }
@@ -73,11 +74,25 @@
         .kpi .label { color: var(--muted); font-size: 12px; }
         .kpi .value { font-weight: 700; font-size: 18px; }
 
+        /* News */
+        .news-controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+        .input, .select { background: var(--chip); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 10px 12px; width: 100%; max-width: 320px; }
+        .news-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+        .news-card { grid-column: span 4; display: flex; flex-direction: column; gap: 8px; }
+        .news-meta { color: var(--muted); font-size: 12px; }
+        .news-title { font-weight: 700; font-size: 18px; margin: 2px 0; }
+        .news-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        /* Charts */
+        .chart-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+        .legend { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
         .footer { padding: 28px 0 40px; color: var(--muted); text-align: center; border-top: 1px solid var(--border); margin-top: 28px; }
 
         @media (max-width: 900px) {
             .col-4, .col-8 { grid-column: span 12; }
             .hero h1 { font-size: 34px; }
+            .news-card { grid-column: span 12; }
         }
     </style>
 </head>
@@ -86,267 +101,107 @@
         <div class="container nav">
             <div class="brand">
                 <div class="brand-badge">☕</div>
-                <div>Coffee Database</div>
+                <div>Coffee News</div>
             </div>
             <nav aria-label="Primary">
                 <ul>
-                    <li><a href="#overview">Overview</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#usage">Usage</a></li>
-                    <li><a href="#components">Components</a></li>
-                    <li><a href="#schema">Schema</a></li>
-                    <li><a href="#sources">Sources</a></li>
-                    <li><a href="#requirements">Requirements</a></li>
-                    <li><a href="#authors">Authors</a></li>
+                    <li><a href="#news">News</a></li>
+                    <li><a href="#prices">Prices</a></li>
+                    <li><a href="#market">Market</a></li>
+                    <li><a href="#about">About</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
     <main>
-        <section class="hero" id="overview">
+        <section class="hero" id="top">
             <div class="container">
-                <h1>Coffee Data Collection & Analysis</h1>
-                <p>A comprehensive system for scraping coffee prices, transforming CSV datasets, syncing to MySQL, and exploring the Vietnamese coffee market via notebooks and scripts.</p>
+                <h1>Coffee News & Market Insights</h1>
+                <p>Curated coffee headlines, live price trends, and market snapshots. Explore what's brewing in the world of coffee.</p>
                 <div class="chips">
-                    <span class="chip">Beautiful Soup</span>
-                    <span class="chip">Selenium</span>
-                    <span class="chip">MySQL (Aiven)</span>
-                    <span class="chip">Jupyter EDA</span>
-                    <span class="chip">Vietnam Market</span>
+                    <span class="chip">Prices</span>
+                    <span class="chip">Supply</span>
+                    <span class="chip">Trade</span>
+                    <span class="chip">Vietnam</span>
                 </div>
                 <div class="kpi">
-                    <div class="item"><div class="label">Project</div><div class="value">ADY 201</div></div>
-                    <div class="item"><div class="label">Focus</div><div class="value">Scrape → Process → Analyze</div></div>
-                    <div class="item"><div class="label">DB</div><div class="value">MySQL</div></div>
+                    <div class="item"><div class="label">Last Update</div><div class="value" id="lastUpdate">—</div></div>
+                    <div class="item"><div class="label">Articles</div><div class="value" id="numArticles">—</div></div>
+                    <div class="item"><div class="label">Markets</div><div class="value">VN & Global</div></div>
                 </div>
             </div>
         </section>
-
-        <section id="features">
-            <div class="container grid">
-                <div class="col-4">
-                    <div class="card">
-                        <h2>Features</h2>
-                        <ul>
-                            <li>Multiple scraping approaches</li>
-                            <li>Automated MySQL sync</li>
-                            <li>Processing pipelines</li>
-                            <li>Fallback data generation</li>
-                            <li>EDA with notebooks</li>
-                            <li>Error handling & validation</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-8">
-                    <div class="card">
-                        <h2>Project Structure</h2>
-                        <pre><code>coffee_dabase/
-├─ Data Files (CSV)
-├─ Web Scrapers (BS4, Selenium)
-├─ Database Sync (scripts, notebooks)
-├─ Analysis Notebooks (EDA)
-├─ Testing (pytest style)
-└─ Documentation (README, VN guide)
-                        </code></pre>
-                        <h3>Data Highlights</h3>
-                        <ul>
-                            <li>Prices from giacaphe.com</li>
-                            <li>Production, weather, export statistics</li>
-                            <li>Market trade by importer country</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="usage">
-            <div class="container grid">
-                <div class="col-8">
-                    <div class="card">
-                        <h2>Usage</h2>
-                        <h3>Web Scraping</h3>
-                        <pre><code># Simple (Beautiful Soup)
-python coffee_price_scraper.py
-
-# Selenium (Cloudflare)
-python coffee_price_scraper_selenium.py
-
-# Complete with fallback
-python coffee_price_scraper_final.py
-                        </code></pre>
-                        <p>Scrapers attempt to fetch latest prices, persist CSVs with timestamps, and generate fallback data when necessary.</p>
-                        <h3>Database Sync</h3>
-                        <pre><code>python sync_coffee.py
-                        </code></pre>
-                        <p>Reads CSVs, transforms wide→long, creates/updates tables, and upserts into MySQL.</p>
-                        <h3>Analysis</h3>
-                        <pre><code>jupyter notebook eda_data_coffee.ipynb
-jupyter notebook main_coffee.ipynb
-                        </code></pre>
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="card">
-                        <h2>Setup</h2>
-                        <h3>Prerequisites</h3>
-                        <ul>
-                            <li>Python 3.8+</li>
-                            <li>MySQL / Aiven MySQL</li>
-                            <li>Chrome + ChromeDriver</li>
-                        </ul>
-                        <h3>Install</h3>
-                        <pre><code>pip install pandas pymysql sqlalchemy 
-beautifulsoup4 selenium requests 
-webdriver-manager python-dotenv
-                        </code></pre>
-                        <h3>.env</h3>
-                        <pre><code>HOST=your-host
-PORT=3306
-USER=your-user
-PASSWORD=your-pass
-DB=your-db
-CA_PEM=/path/to/ca.pem
-                        </code></pre>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="components">
-            <div class="container grid">
-                <div class="col-4">
-                    <div class="card">
-                        <h2>Scrapers</h2>
-                        <ul>
-                            <li><code>coffee_price_scraper_final.py</code> – robust, fallback, timestamps</li>
-                            <li><code>coffee_price_scraper_selenium.py</code> – bypass Cloudflare</li>
-                            <li><code>coffee_price_scraper.py</code> – simple BS4</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="card">
-                        <h2>Processing</h2>
-                        <ul>
-                            <li><code>sync_coffee.py</code> – wide→long, normalize, upsert</li>
-                            <li><code>unprocessing_sql.py</code> – raw processing</li>
-                            <li><code>main_coffee.ipynb</code> – DB ops</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="card">
-                        <h2>Testing & Docs</h2>
-                        <ul>
-                            <li><code>test_scraper.py</code>, <code>test_selenium.py</code></li>
-                            <li>README + Vietnamese guide</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="schema">
+        
+        <!-- News Section -->
+        <section id="news">
             <div class="container">
                 <div class="card">
-                    <h2>Database Schema</h2>
-                    <div class="grid">
-                        <div class="col-4">
-                            <h3>coffee_long</h3>
-                            <ul>
-                                <li>hang_muc</li>
-                                <li>year</li>
-                                <li>value</li>
-                            </ul>
-                        </div>
-                        <div class="col-4">
-                            <h3>weather</h3>
-                            <ul>
-                                <li>year</li>
-                                <li>temperature</li>
-                                <li>humidity</li>
-                                <li>rain</li>
-                            </ul>
-                        </div>
-                        <div class="col-4">
-                            <h3>production</h3>
-                            <ul>
-                                <li>year</li>
-                                <li>area_thousand_ha</li>
-                                <li>output_tons</li>
-                                <li>export_tons</li>
-                            </ul>
-                        </div>
-                        <div class="col-4">
-                            <h3>coffee_export</h3>
-                            <ul>
-                                <li>year</li>
-                                <li>export_value_million_usd</li>
-                                <li>price_world_usd_per_ton</li>
-                                <li>price_vn_usd_per_ton</li>
-                            </ul>
-                        </div>
-                        <div class="col-4">
-                            <h3>market_trade</h3>
-                            <ul>
-                                <li>importer</li>
-                                <li>year</li>
-                                <li>trade_value_million_usd</li>
-                                <li>quantity_tons</li>
-                            </ul>
-                        </div>
+                    <h2>Latest Coffee News</h2>
+                    <div class="news-controls">
+                        <input id="searchInput" class="input" type="search" placeholder="Search news (e.g., robusta, Vietnam, price)" aria-label="Search news" />
+                        <select id="tagFilter" class="select" aria-label="Filter by tag">
+                            <option value="">All tags</option>
+                            <option>Prices</option>
+                            <option>Supply</option>
+                            <option>Trade</option>
+                            <option>Vietnam</option>
+                            <option>Global</option>
+                            <option>Climate</option>
+                        </select>
                     </div>
+                    <div id="newsGrid" class="news-grid"></div>
                 </div>
             </div>
         </section>
 
-        <section id="sources">
+        <!-- Prices Section -->
+        <section id="prices">
             <div class="container grid">
-                <div class="col-6 col-8">
-                    <div class="card">
-                        <h2>Data Sources</h2>
-                        <ul>
-                            <li>Coffee prices: scraped from <code>giacaphe.com</code> (with fallback)</li>
-                            <li>Production, weather, export: <code>Data_coffee.csv</code></li>
-                            <li>Market trade by importer: <code>Thi_phan_3_thi_truong_chinh.csv</code></li>
-                        </ul>
+                <div class="col-8">
+                    <div class="chart-wrap">
+                        <h2>Robusta Price Trend (USD/ton)</h2>
+                        <canvas id="priceChart" height="140"></canvas>
+                        <div class="legend">Sample data for demo. Hook up to your scraped CSV to go live.</div>
                     </div>
                 </div>
                 <div class="col-4">
                     <div class="card">
-                        <h2>Requirements</h2>
-                        <ul>
-                            <li>pandas, pymysql, sqlalchemy</li>
-                            <li>beautifulsoup4, selenium, requests</li>
-                            <li>webdriver-manager, python-dotenv</li>
-                            <li>(Notebooks) jupyter, ipykernel</li>
-                        </ul>
+                        <h2>Highlights</h2>
+                        <ul id="priceHighlights"></ul>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="requirements">
+        <!-- Market Section -->
+        <section id="market">
+            <div class="container grid">
+                <div class="col-6">
+                    <div class="chart-wrap">
+                        <h2>Top Importers Market Share</h2>
+                        <canvas id="marketShareChart" height="160"></canvas>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="chart-wrap">
+                        <h2>Production by Year (k tons)</h2>
+                        <canvas id="productionChart" height="160"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about">
             <div class="container">
                 <div class="card">
-                    <h2>Configuration Notes</h2>
+                    <h2>About</h2>
+                    <p>This site showcases coffee news and interactive visuals. Data can be connected to your scrapers (<code>coffee_price_scraper*.py</code>) and processed CSVs via a small API or client-side loader.</p>
                     <ul>
-                        <li>Update CSV paths in <code>sync_coffee.py</code>, <code>main_coffee.ipynb</code>, <code>unprocessing_sql.py</code>.</li>
-                        <li>MySQL connection via <code>.env</code>; ensure <code>utf8mb4</code> charset.</li>
-                        <li>ChromeDriver is auto-managed; configure headless/timeouts if needed.</li>
-                        <li>For Aiven MySQL, provide <code>CA_PEM</code> certificate path.</li>
+                        <li>Content: coffee headlines, summaries, tags, and dates</li>
+                        <li>Charts: prices, production, market share</li>
+                        <li>Filters: search and tag filter</li>
                     </ul>
-                </div>
-            </div>
-        </section>
-
-        <section id="authors">
-            <div class="container">
-                <div class="card">
-                    <h2>Authors & License</h2>
-                    <p><strong>ADY 201 - Team 7</strong></p>
-                    <p>Educational project for coursework. Some sources may require attribution for commercial use.</p>
                 </div>
             </div>
         </section>
@@ -358,8 +213,159 @@ CA_PEM=/path/to/ca.pem
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
+        // Footer year
         document.getElementById('year').textContent = new Date().getFullYear();
+
+        // --- Sample Data (replace with your fetched/scraped data) ---
+        const newsItems = [
+            { id: 1, title: 'Vietnam robusta prices hit multi-year highs', date: '2025-10-22', tags: ['Prices','Vietnam','Trade'], summary: 'Tight supply and strong robusta demand lifted spot prices; exporters see thinner stocks.' },
+            { id: 2, title: 'Global arabica edges lower on profit-taking', date: '2025-10-20', tags: ['Prices','Global'], summary: 'Arabica futures cooled after a sharp run-up; traders eye Brazil weather patterns.' },
+            { id: 3, title: 'Logistics costs ease for coffee shipments', date: '2025-10-18', tags: ['Trade','Global'], summary: 'Freight rates have normalized, improving margins for roasters and traders.' },
+            { id: 4, title: 'Climate variability impacts yields', date: '2025-10-15', tags: ['Climate','Supply','Global'], summary: 'Irregular rainfall patterns pose challenges; adaptation strategies are underway.' },
+            { id: 5, title: 'Domestic consumption rises in Vietnam', date: '2025-10-12', tags: ['Vietnam','Supply'], summary: 'Specialty cafes and instant coffee drive steady growth in domestic demand.' },
+        ];
+
+        const priceSeries = {
+            labels: ['Apr','May','Jun','Jul','Aug','Sep','Oct'],
+            values: [3180, 3250, 3325, 3400, 3510, 3600, 3720]
+        };
+
+        const marketShare = {
+            labels: ['EU','USA','Japan','Russia','Others'],
+            values: [38, 27, 14, 6, 15]
+        };
+
+        const productionByYear = {
+            labels: ['2019','2020','2021','2022','2023','2024','2025'],
+            values: [1750, 1680, 1820, 1900, 1860, 1930, 1980]
+        };
+
+        // --- News Rendering ---
+        const newsGrid = document.getElementById('newsGrid');
+        const searchInput = document.getElementById('searchInput');
+        const tagFilter = document.getElementById('tagFilter');
+        const lastUpdate = document.getElementById('lastUpdate');
+        const numArticles = document.getElementById('numArticles');
+
+        function renderNews(items) {
+            newsGrid.innerHTML = '';
+            const sorted = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
+            sorted.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card news-card';
+                card.innerHTML = `
+                    <div class="news-meta">${new Date(item.date).toLocaleDateString()}</div>
+                    <div class="news-title">${item.title}</div>
+                    <div class="news-summary">${item.summary}</div>
+                    <div class="news-tags">${item.tags.map(t => `<span class="chip">${t}</span>`).join(' ')}</div>
+                `;
+                newsGrid.appendChild(card);
+            });
+            numArticles.textContent = items.length;
+            lastUpdate.textContent = new Date().toLocaleDateString();
+        }
+
+        function filterNews() {
+            const q = (searchInput.value || '').toLowerCase();
+            const tag = tagFilter.value;
+            const filtered = newsItems.filter(n => {
+                const matchesText = !q || `${n.title} ${n.summary}`.toLowerCase().includes(q);
+                const matchesTag = !tag || n.tags.includes(tag);
+                return matchesText && matchesTag;
+            });
+            renderNews(filtered);
+        }
+
+        searchInput.addEventListener('input', filterNews);
+        tagFilter.addEventListener('change', filterNews);
+
+        // --- Charts ---
+        function formatUsdTon(v) { return `$${v.toLocaleString()}/t`; }
+
+        const priceCtx = document.getElementById('priceChart');
+        const priceChart = new Chart(priceCtx, {
+            type: 'line',
+            data: {
+                labels: priceSeries.labels,
+                datasets: [{
+                    label: 'Robusta (USD/ton)',
+                    data: priceSeries.values,
+                    borderColor: 'rgba(139,92,246,1)',
+                    backgroundColor: 'rgba(139,92,246,0.2)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (ctx) => formatUsdTon(ctx.parsed.y) } }
+                },
+                scales: {
+                    y: { ticks: { callback: (v) => `$${v}` }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        const marketCtx = document.getElementById('marketShareChart');
+        const marketChart = new Chart(marketCtx, {
+            type: 'doughnut',
+            data: {
+                labels: marketShare.labels,
+                datasets: [{
+                    data: marketShare.values,
+                    backgroundColor: ['#8b5cf6','#22c55e','#06b6d4','#f59e0b','#64748b'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom', labels: { color: '#d1d5db' } } }
+            }
+        });
+
+        const productionCtx = document.getElementById('productionChart');
+        const productionChart = new Chart(productionCtx, {
+            type: 'bar',
+            data: {
+                labels: productionByYear.labels,
+                datasets: [{
+                    label: 'Production (k tons)',
+                    data: productionByYear.values,
+                    backgroundColor: 'rgba(34,197,94,0.6)',
+                    borderColor: 'rgba(34,197,94,1)',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: 'rgba(255,255,255,0.06)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Highlights
+        const priceHighlights = document.getElementById('priceHighlights');
+        const last = priceSeries.values[priceSeries.values.length - 1];
+        const first = priceSeries.values[0];
+        const change = last - first;
+        const pct = (change / first) * 100;
+        priceHighlights.innerHTML = `
+            <li><strong>Latest</strong>: ${formatUsdTon(last)}</li>
+            <li><strong>Change (period)</strong>: ${change > 0 ? '+' : ''}${change} USD/t (${pct.toFixed(1)}%)</li>
+            <li><strong>High</strong>: ${formatUsdTon(Math.max(...priceSeries.values))}</li>
+            <li><strong>Low</strong>: ${formatUsdTon(Math.min(...priceSeries.values))}</li>
+        `;
+
+        // Initial render
+        renderNews(newsItems);
     </script>
 </body>
 </html>
