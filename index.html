@@ -32,7 +32,10 @@
             margin:0;
             font-family: 'Poppins', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             color:var(--text);
-            background: linear-gradient(180deg, var(--bg) 0%, #071018 100%);
+            background: 
+                radial-gradient(600px at 80% 40px, rgba(122,75,45,0.12), transparent),
+                radial-gradient(800px at 20% 90%, rgba(184,139,74,0.08), transparent),
+                linear-gradient(180deg, var(--bg) 0%, #071018 100%);
             -webkit-font-smoothing:antialiased;
             -moz-osx-font-smoothing:grayscale;
         }
@@ -53,14 +56,26 @@
         .hero-left{padding:28px;border-radius:16px;background:linear-gradient(180deg, rgba(59,43,33,0.18), rgba(59,43,33,0.06));box-shadow:0 6px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
         .hero h1{margin:0;font-size:36px;line-height:1.05;color:var(--text)}
         .hero p{color:var(--muted);margin-top:10px}
-        .cta{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:12px;background:linear-gradient(90deg,var(--brown-2),var(--gold));color:#111;font-weight:600;border:none;cursor:pointer;margin-top:18px;box-shadow:0 6px 16px rgba(122,75,45,0.14);transition:transform .18s}
-        .cta:hover{transform:translateY(-3px)}
+        .cta{
+            display:inline-flex;align-items:center;gap:10px;
+            padding:12px 18px;border-radius:12px;
+            background:linear-gradient(90deg,var(--brown-2),var(--gold));
+            color:#111;font-weight:600;border:none;cursor:pointer;
+            margin-top:18px;
+            box-shadow:0 6px 16px rgba(122,75,45,0.14);
+            transition:all .2s ease-out;
+        }
+        .cta:hover{
+            transform:translateY(-3px);
+            box-shadow:0 8px 24px rgba(184,139,74,0.25),
+                      0 0 0 2px rgba(184,139,74,0.1);
+        }
         .hero-stats{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
         .stat{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);min-width:120px}
         .stat .label{font-size:12px;color:var(--muted)}
         .stat .value{font-size:18px;font-weight:600}
 
-        .hero-right{height:260px;border-radius:16px;overflow:hidden;background-image:url('https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=ceb8db47b6f6b30a3d0f89ca9d5f3b4b');background-size:cover;background-position:center;position:relative}
+        .hero-right{height:260px;border-radius:16px;overflow:hidden;background-image:url('https://images.unsplash.com/photo-1599744956087-9645924a3648?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3');background-size:cover;background-position:center;position:relative}
         .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,12,15,0.25), rgba(59,43,33,0.35));display:flex;flex-direction:column;justify-content:flex-end;padding:18px}
         .hero-overlay .tag{background:rgba(0,0,0,0.3);padding:6px 10px;border-radius:999px;color:var(--gold);font-weight:600;font-size:12px}
 
@@ -70,7 +85,16 @@
         .col-8{grid-column:span 8}
         .col-4{grid-column:span 4}
         .col-6{grid-column:span 6}
-        .card{background:var(--panel);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03)}
+        .card{
+            background:var(--panel);border-radius:12px;padding:18px;
+            border:1px solid rgba(255,255,255,0.03);
+            transition:all .3s ease-out;
+        }
+        .card:hover{
+            border-color:rgba(184,139,74,0.1);
+            box-shadow:0 8px 32px rgba(0,0,0,0.2);
+            transform:translateY(-2px);
+        }
 
         /* Chart styles */
         .chart-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -354,7 +378,20 @@
                     {label:'Domestic (USD/t)',data:samplePrices.domestic,borderColor:'#6b4a3a',backgroundColor:'rgba(107,74,58,0.06)',tension:0.25,fill:false}
                 ]
             },
-            options:{responsive:true,plugins:{legend:{labels:{color: 'rgba(255,255,255,0.85)'}}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.03)'}}}
+            options:{
+                responsive: true,
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                },
+                plugins:{
+                    legend:{labels:{color: 'rgba(255,255,255,0.85)'}}
+                },
+                scales:{
+                    x:{grid:{display:false}},
+                    y:{grid:{color:'rgba(255,255,255,0.03)'}}
+                }
+            }
         });
 
         // Populate KPI values
@@ -412,7 +449,21 @@
                     fill: true
                 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' } } } }
+            options: { 
+                responsive: true,
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                },
+                plugins: { 
+                    legend: { display: false } 
+                }, 
+                scales: { 
+                    y: { 
+                        grid: { color: 'rgba(255,255,255,0.03)' }
+                    } 
+                } 
+            }
         });
 
         // --- AI Forecast chart (extend last known price) ---
@@ -454,9 +505,19 @@
 
         // Simple fade-in on scroll
         const observer = new IntersectionObserver((entries)=>{
-            entries.forEach(e=>{ if(e.isIntersecting) e.target.style.opacity=1; });
+            entries.forEach(e=>{ 
+                if(e.isIntersecting) {
+                    e.target.style.opacity = 1;
+                    e.target.style.transform = 'translateY(0)';
+                }
+            });
         },{threshold:0.12});
-        document.querySelectorAll('section .card, .news-item, .hero-left, .hero-right').forEach(el=>{el.style.opacity=0;el.style.transition='opacity .9s ease-out';observer.observe(el)});
+        document.querySelectorAll('section .card, .news-item, .hero-left, .hero-right').forEach(el=>{
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity .9s ease-out, transform .6s ease-out';
+            observer.observe(el);
+        });
 
     </script>
 </body>
