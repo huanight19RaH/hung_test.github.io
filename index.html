@@ -1,371 +1,463 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Coffee News & Insights</title>
-    <meta name="description" content="Latest coffee news, prices, market insights, and interactive charts." />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vietnam Coffee Data Portal</title>
+    <meta name="description" content="From the Highlands to the World — Real-time Coffee Analytics." />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0f1115;
-            --card: #151823;
-            --muted: #9aa4b2;
-            --text: #e6e9ef;
-            --accent: #8b5cf6; /* violet */
-            --accent-2: #22c55e; /* green */
-            --border: #232836;
-            --chip: #1f2430;
-        }
-        * { box-sizing: border-box; }
-        html, body { height: 100%; }
-        body {
-            margin: 0;
-            font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-            color: var(--text);
-            background: radial-gradient(1200px 800px at 80% -10%, rgba(139,92,246,0.12), transparent 60%),
-                        radial-gradient(1000px 700px at -10% 10%, rgba(34,197,94,0.10), transparent 60%),
-                        var(--bg);
-            line-height: 1.6;
-        }
-        a { color: var(--accent); text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .container { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-        /* Header */
-        header {
-            position: sticky; top: 0; z-index: 10;
-            backdrop-filter: saturate(180%) blur(8px);
-            background: linear-gradient(to bottom, rgba(15,17,21,0.9), rgba(15,17,21,0.6));
-            border-bottom: 1px solid var(--border);
+    <!-- Leaflet for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2U9rR8s6n1F6fM0oC2a8ZrT2c1f6qk6bYx5bD0M=" crossorigin=""/>
+
+    <style>
+        :root{
+            --bg:#0b0c0f;            /* deep charcoal */
+            --panel:#121217;         /* card background */
+            --muted:#9ea7b3;        /* subtle text */
+            --text:#f3f5f7;         /* main text */
+            --brown-1:#3b2b21;      /* coffee brown dark */
+            --brown-2:#7a4b2d;      /* warm highlight */
+            --gold:#b88b4a;         /* gold accent */
+            --glass: rgba(255,255,255,0.03);
+            --glass-2: rgba(255,255,255,0.02);
         }
-        .nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
-        .brand { display: flex; gap: 10px; align-items: center; font-weight: 700; }
-        .brand-badge { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; font-weight: 800; }
-        nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 14px; margin: 0; padding: 0; }
-        nav a { color: var(--text); padding: 8px 10px; border-radius: 8px; }
-        nav a:hover { background: var(--chip); text-decoration: none; }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0;
+            font-family: 'Poppins', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            color:var(--text);
+            background: linear-gradient(180deg, var(--bg) 0%, #071018 100%);
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+        }
+        a{color:var(--gold)}
+
+        /* Layout */
+        .container{max-width:1200px;margin:0 auto;padding:24px}
+        header{position:sticky;top:0;z-index:40;background:linear-gradient(180deg, rgba(11,12,15,0.75), rgba(11,12,15,0.55));backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,0.03)}
+        .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0}
+        .brand{display:flex;align-items:center;gap:12px}
+        .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--brown-1),var(--brown-2));display:grid;place-items:center;font-weight:700;font-size:18px}
+        nav ul{display:flex;gap:12px;list-style:none;margin:0;padding:0}
+        nav a{padding:8px 12px;border-radius:8px;color:var(--muted);text-decoration:none}
+        nav a:hover{color:var(--text);background:var(--glass)}
 
         /* Hero */
-        .hero { padding: 56px 0 24px; text-align: center; }
-        .hero h1 { margin: 0 0 12px; font-size: 42px; line-height: 1.1; letter-spacing: -0.02em; }
-        .hero p { margin: 0 auto; max-width: 780px; color: var(--muted); font-size: 18px; }
-        .chips { margin-top: 18px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .chip { padding: 6px 12px; border: 1px solid var(--border); background: var(--chip); border-radius: 999px; color: var(--muted); font-size: 13px; }
+        .hero{display:grid;grid-template-columns:1fr 380px;gap:28px;align-items:center;padding:48px 0}
+        .hero-left{padding:28px;border-radius:16px;background:linear-gradient(180deg, rgba(59,43,33,0.18), rgba(59,43,33,0.06));box-shadow:0 6px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
+        .hero h1{margin:0;font-size:36px;line-height:1.05;color:var(--text)}
+        .hero p{color:var(--muted);margin-top:10px}
+        .cta{display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:12px;background:linear-gradient(90deg,var(--brown-2),var(--gold));color:#111;font-weight:600;border:none;cursor:pointer;margin-top:18px;box-shadow:0 6px 16px rgba(122,75,45,0.14);transition:transform .18s}
+        .cta:hover{transform:translateY(-3px)}
+        .hero-stats{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+        .stat{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);min-width:120px}
+        .stat .label{font-size:12px;color:var(--muted)}
+        .stat .value{font-size:18px;font-weight:600}
+
+        .hero-right{height:260px;border-radius:16px;overflow:hidden;background-image:url('https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=ceb8db47b6f6b30a3d0f89ca9d5f3b4b');background-size:cover;background-position:center;position:relative}
+        .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,12,15,0.25), rgba(59,43,33,0.35));display:flex;flex-direction:column;justify-content:flex-end;padding:18px}
+        .hero-overlay .tag{background:rgba(0,0,0,0.3);padding:6px 10px;border-radius:999px;color:var(--gold);font-weight:600;font-size:12px}
 
         /* Sections */
-        section { padding: 28px 0; }
-        .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-        .col-4 { grid-column: span 4; }
-        .col-8 { grid-column: span 8; }
-        .col-6 { grid-column: span 6; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
-        h2 { margin: 0 0 10px; font-size: 22px; }
-        h3 { margin: 14px 0 8px; font-size: 16px; color: var(--muted); font-weight: 600; }
-        ul { margin: 8px 0 0 18px; }
-        code, pre { background: #0b0d12; color: #dbe1ea; border: 1px solid var(--border); border-radius: 10px; }
-        code { padding: 2px 6px; }
-        pre { padding: 12px; overflow: auto; }
+        section{padding:28px 0}
+        .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+        .col-8{grid-column:span 8}
+        .col-4{grid-column:span 4}
+        .col-6{grid-column:span 6}
+        .card{background:var(--panel);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03)}
 
-        .kpi { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-        .kpi .item { background: var(--chip); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
-        .kpi .label { color: var(--muted); font-size: 12px; }
-        .kpi .value { font-weight: 700; font-size: 18px; }
+        /* Chart styles */
+        .chart-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+        .kpis{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+        .kpi-card{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);min-width:140px}
 
-        /* News */
-        .news-controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-        .input, .select { background: var(--chip); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 10px 12px; width: 100%; max-width: 320px; }
-        .news-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-        .news-card { grid-column: span 4; display: flex; flex-direction: column; gap: 8px; }
-        .news-meta { color: var(--muted); font-size: 12px; }
-        .news-title { font-weight: 700; font-size: 18px; margin: 2px 0; }
-        .news-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        /* Map */
+        #exportMap{height:360px;border-radius:10px}
 
-        /* Charts */
-        .chart-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
-        .legend { color: var(--muted); font-size: 12px; margin-top: 8px; }
+        /* News grid */
+        .news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+        .news-item{display:flex;flex-direction:column;gap:8px}
+        .news-item img{width:100%;height:140px;object-fit:cover;border-radius:8px}
+        .news-meta{font-size:12px;color:var(--muted)}
+        .news-title{font-weight:600}
 
-        .footer { padding: 28px 0 40px; color: var(--muted); text-align: center; border-top: 1px solid var(--border); margin-top: 28px; }
+        /* About & contact */
+        .about-wrap{display:flex;gap:18px;align-items:center}
+        .author-photo{width:120px;height:120px;border-radius:12px;background:url('https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=36b7f3f8f3b5a2c2a6f7d8a3c6b2f4e1') center/cover}
+        .tech-icons{display:flex;gap:10px;margin-top:10px}
+        .tech-icons .icon{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.02);display:grid;place-items:center}
 
-        @media (max-width: 900px) {
-            .col-4, .col-8 { grid-column: span 12; }
-            .hero h1 { font-size: 34px; }
-            .news-card { grid-column: span 12; }
+        /* Contact bg */
+        .contact{background-image:url('https://images.unsplash.com/photo-1511920170033-f8396924c348?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=ec0d3b2c9b4bf0a9f7b2e6b2d5a1c3e3');background-size:cover;background-position:center;padding:28px;border-radius:12px}
+        .contact .overlay{background:linear-gradient(180deg, rgba(11,12,15,0.6), rgba(59,43,33,0.65));padding:20px;border-radius:12px}
+
+        footer{padding:28px 0;text-align:center;color:var(--muted);border-top:1px solid rgba(255,255,255,0.02);margin-top:20px}
+
+        /* Responsive */
+        @media (max-width:1000px){
+            .hero{grid-template-columns:1fr;}
+            .grid{grid-template-columns:repeat(6,1fr)}
+            .col-8{grid-column:span 6}
+            .col-4{grid-column:span 6}
+            .news-grid{grid-template-columns:repeat(2,1fr)}
+        }
+        @media (max-width:640px){
+            .news-grid{grid-template-columns:1fr}
+            nav ul{display:none}
         }
     </style>
+
 </head>
 <body>
     <header>
         <div class="container nav">
             <div class="brand">
-                <div class="brand-badge">☕</div>
-                <div>Coffee News</div>
+                <div class="logo">VN</div>
+                <div>
+                    <div style="font-weight:700">Vietnam Coffee Data Portal</div>
+                    <div style="font-size:12px;color:var(--muted)">From the Highlands to the World — Real-time Coffee Analytics</div>
+                </div>
             </div>
-            <nav aria-label="Primary">
+            <nav aria-label="Main navigation">
                 <ul>
+                    <li><a href="#top">Home</a></li>
+                    <li><a href="#market-overview">Market</a></li>
+                    <li><a href="#export-insights">Exports</a></li>
+                    <li><a href="#production">Production</a></li>
                     <li><a href="#news">News</a></li>
-                    <li><a href="#prices">Prices</a></li>
-                    <li><a href="#market">Market</a></li>
                     <li><a href="#about">About</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <main>
-        <section class="hero" id="top">
-            <div class="container">
-                <h1>Coffee News & Market Insights</h1>
-                <p>Curated coffee headlines, live price trends, and market snapshots. Explore what's brewing in the world of coffee.</p>
-                <div class="chips">
-                    <span class="chip">Prices</span>
-                    <span class="chip">Supply</span>
-                    <span class="chip">Trade</span>
-                    <span class="chip">Vietnam</span>
+    <main class="container">
+        <!-- HERO -->
+        <section id="top" class="hero">
+            <div class="hero-left card">
+                <h1>Vietnam Coffee Data Portal</h1>
+                <p>From the Highlands to the World — Real-time Coffee Analytics.</p>
+                <div style="display:flex;gap:12px;align-items:center;margin-top:18px">
+                    <button class="cta" id="exploreBtn">Explore Data</button>
+                    <div style="color:var(--muted);font-size:13px">Live, historical and forecast analytics across Vietnam's coffee supply chain.</div>
                 </div>
-                <div class="kpi">
-                    <div class="item"><div class="label">Last Update</div><div class="value" id="lastUpdate">—</div></div>
-                    <div class="item"><div class="label">Articles</div><div class="value" id="numArticles">—</div></div>
-                    <div class="item"><div class="label">Markets</div><div class="value">VN & Global</div></div>
+
+                <div class="hero-stats">
+                    <div class="stat"><div class="label">Latest update</div><div class="value" id="lastUpdate">—</div></div>
+                    <div class="stat"><div class="label">Markets</div><div class="value">Vietnam & Global</div></div>
+                    <div class="stat"><div class="label">Data Sources</div><div class="value">Scrapers · MySQL · AI</div></div>
                 </div>
             </div>
-        </section>
-        
-        <!-- News Section -->
-        <section id="news">
-            <div class="container">
-                <div class="card">
-                    <h2>Latest Coffee News</h2>
-                    <div class="news-controls">
-                        <input id="searchInput" class="input" type="search" placeholder="Search news (e.g., robusta, Vietnam, price)" aria-label="Search news" />
-                        <select id="tagFilter" class="select" aria-label="Filter by tag">
-                            <option value="">All tags</option>
-                            <option>Prices</option>
-                            <option>Supply</option>
-                            <option>Trade</option>
-                            <option>Vietnam</option>
-                            <option>Global</option>
-                            <option>Climate</option>
-                        </select>
-                    </div>
-                    <div id="newsGrid" class="news-grid"></div>
+
+            <div class="hero-right">
+                <div class="hero-overlay">
+                    <div class="tag">Central Highlands — Buon Ma Thuot</div>
                 </div>
             </div>
         </section>
 
-        <!-- Prices Section -->
-        <section id="prices">
-            <div class="container grid">
+        <!-- MARKET OVERVIEW -->
+        <section id="market-overview">
+            <div class="grid">
                 <div class="col-8">
-                    <div class="chart-wrap">
-                        <h2>Robusta Price Trend (USD/ton)</h2>
-                        <canvas id="priceChart" height="140"></canvas>
-                        <div class="legend">Sample data for demo. Hook up to your scraped CSV to go live.</div>
+                    <div class="card">
+                        <div class="chart-head">
+                            <div>
+                                <h3>Market Overview</h3>
+                                <div style="color:var(--muted);font-size:13px">Daily coffee prices — Arabica vs Robusta, Domestic vs Global</div>
+                            </div>
+                            <div style="font-size:13px;color:var(--muted)">Data: sample demo</div>
+                        </div>
+                        <canvas id="marketOverviewChart" height="140" style="margin-top:12px"></canvas>
+                        <div class="kpis">
+                            <div class="kpi-card"><div class="label">Robusta (today)</div><div class="value" id="kpiRobusta">—</div></div>
+                            <div class="kpi-card"><div class="label">Arabica (today)</div><div class="value" id="kpiArabica">—</div></div>
+                            <div class="kpi-card"><div class="label">7d change</div><div class="value" id="kpi7d">—</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <div class="card">
+                        <h3>Quick Insights</h3>
+                        <ul style="color:var(--muted);margin-top:8px">
+                            <li id="insight1">Dry season expected — Dak Lak</li>
+                            <li id="insight2">Export demand stable</li>
+                            <li id="insight3">Domestic consumption rising</li>
+                        </ul>
+                    </div>
+
+                    <div class="card" style="margin-top:16px">
+                        <h3>Weather — Buon Ma Thuot</h3>
+                        <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
+                            <div style="font-size:32px;font-weight:700">26°C</div>
+                            <div style="color:var(--muted)">Humidity 78% · Rain 5 mm</div>
+                        </div>
+                        <div style="margin-top:12px;color:var(--muted);font-size:13px">Last refreshed: <span id="weatherTime">—</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXPORT INSIGHTS -->
+        <section id="export-insights">
+            <div class="grid">
+                <div class="col-8">
+                    <div class="card">
+                        <h3>Vietnam Coffee Exports — World Map</h3>
+                        <div id="exportMap"></div>
                     </div>
                 </div>
                 <div class="col-4">
                     <div class="card">
-                        <h2>Highlights</h2>
-                        <ul id="priceHighlights"></ul>
+                        <h3>Export Share</h3>
+                        <canvas id="exportPie" height="220"></canvas>
+                        <div style="margin-top:8px;color:var(--muted)">Top 5 importing countries</div>
+                        <ol id="topImporters" style="margin-top:8px;color:var(--muted)"></ol>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Market Section -->
-        <section id="market">
-            <div class="container grid">
-                <div class="col-6">
-                    <div class="chart-wrap">
-                        <h2>Top Importers Market Share</h2>
-                        <canvas id="marketShareChart" height="160"></canvas>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="chart-wrap">
-                        <h2>Production by Year (k tons)</h2>
-                        <canvas id="productionChart" height="160"></canvas>
+        <!-- PRODUCTION TRENDS -->
+        <section id="production">
+            <div class="grid">
+                <div class="col-12" style="grid-column:span 12">
+                    <div class="card">
+                        <h3>Production Trends (2005–2024)</h3>
+                        <canvas id="productionTrends" height="120" style="margin-top:12px"></canvas>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- AI FORECAST -->
+        <section id="ai-forecast">
+            <div class="grid">
+                <div class="col-8">
+                    <div class="card">
+                        <h3>AI Forecast — Price Projection</h3>
+                        <canvas id="aiForecastChart" height="140" style="margin-top:12px"></canvas>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card">
+                        <h3>AI Insights</h3>
+                        <p style="color:var(--muted)">Price expected to rise due to dry season in Dak Lak. Supply constraints and higher export demand push robusta prices upward.</p>
+                        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+                            <button class="cta" style="padding:8px 12px;font-size:13px">Generate Report</button>
+                            <button class="cta" style="background:transparent;color:var(--gold);border:1px solid rgba(255,255,255,0.04);">Save Insight</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEWS & REPORTS -->
+        <section id="news">
+            <div class="card">
+                <h3>News & Reports</h3>
+                <div class="news-grid" id="newsGrid"></div>
+            </div>
+        </section>
+
+        <!-- ABOUT -->
         <section id="about">
-            <div class="container">
-                <div class="card">
-                    <h2>About</h2>
-                    <p>This site showcases coffee news and interactive visuals. Data can be connected to your scrapers (<code>coffee_price_scraper*.py</code>) and processed CSVs via a small API or client-side loader.</p>
-                    <ul>
-                        <li>Content: coffee headlines, summaries, tags, and dates</li>
-                        <li>Charts: prices, production, market share</li>
-                        <li>Filters: search and tag filter</li>
-                    </ul>
+            <div class="card about-wrap">
+                <div class="author-photo"></div>
+                <div>
+                    <div style="font-weight:700">Pham Minh Tien</div>
+                    <div style="color:var(--muted);margin-top:6px">Developed using Python, MySQL, and AI-driven analytics to bring transparency to Vietnam’s coffee export data.</div>
+                    <div class="tech-icons">
+                        <div class="icon" title="Python">Py</div>
+                        <div class="icon" title="MySQL">SQL</div>
+                        <div class="icon" title="AI">AI</div>
+                        <div class="icon" title="Cloud">☁️</div>
+                    </div>
                 </div>
             </div>
         </section>
+
+        <!-- CONTACT -->
+        <section id="contact">
+            <div class="contact">
+                <div class="overlay card">
+                    <h3>Contact</h3>
+                    <p style="color:var(--muted)">Get in touch for data access, collaboration or API integration.</p>
+                    <form id="contactForm" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+                        <input name="name" placeholder="Name" required style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text)" />
+                        <input name="email" type="email" placeholder="Email" required style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text)" />
+                        <textarea name="message" placeholder="Message" rows="4" style="grid-column:span 2;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text)"></textarea>
+                        <button type="submit" class="cta" style="grid-column:span 2;justify-self:start">Send message</button>
+                    </form>
+                    <div id="contactMsg" style="margin-top:10px;color:var(--muted)"></div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div>© <span id="year"></span> Vietnam Coffee Data Portal — All rights reserved.</div>
+        </footer>
     </main>
 
-    <footer class="footer">
-        <div class="container">
-            <div>© <span id="year"></span> Coffee Database. All rights reserved.</div>
-        </div>
-    </footer>
-
+    <!-- External libs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j7k3R+2k2cE1z8rA0s2M3wH5k3TJ+7z0k3b1F6M=" crossorigin=""></script>
+
     <script>
         // Footer year
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // --- Sample Data (replace with your fetched/scraped data) ---
-        const newsItems = [
-            { id: 1, title: 'Vietnam robusta prices hit multi-year highs', date: '2025-10-22', tags: ['Prices','Vietnam','Trade'], summary: 'Tight supply and strong robusta demand lifted spot prices; exporters see thinner stocks.' },
-            { id: 2, title: 'Global arabica edges lower on profit-taking', date: '2025-10-20', tags: ['Prices','Global'], summary: 'Arabica futures cooled after a sharp run-up; traders eye Brazil weather patterns.' },
-            { id: 3, title: 'Logistics costs ease for coffee shipments', date: '2025-10-18', tags: ['Trade','Global'], summary: 'Freight rates have normalized, improving margins for roasters and traders.' },
-            { id: 4, title: 'Climate variability impacts yields', date: '2025-10-15', tags: ['Climate','Supply','Global'], summary: 'Irregular rainfall patterns pose challenges; adaptation strategies are underway.' },
-            { id: 5, title: 'Domestic consumption rises in Vietnam', date: '2025-10-12', tags: ['Vietnam','Supply'], summary: 'Specialty cafes and instant coffee drive steady growth in domestic demand.' },
+        // --- Sample data used for demo purposes ---
+        const now = new Date();
+        document.getElementById('lastUpdate').textContent = now.toLocaleString();
+
+        const samplePrices = {
+            labels: ['2025-10-20','2025-10-21','2025-10-22','2025-10-23','2025-10-24','2025-10-25','2025-10-26','2025-10-27','2025-10-28','2025-10-29'],
+            robusta: [3100,3120,3180,3220,3300,3350,3380,3420,3480,3520],
+            arabica: [4200,4180,4250,4280,4310,4350,4380,4400,4440,4460],
+            domestic: [3050,3070,3120,3170,3230,3280,3310,3350,3400,3450],
+            global: [4000,4020,4050,4080,4120,4150,4170,4200,4230,4250]
+        };
+
+        const exportShare = { labels:['EU','USA','Japan','China','Others'], values:[36,24,12,10,18] };
+        const topImporters = [
+            {country:'Germany', share:12},
+            {country:'USA', share:9},
+            {country:'Japan', share:7},
+            {country:'China', share:6},
+            {country:'Spain', share:5}
         ];
 
-        const priceSeries = {
-            labels: ['Apr','May','Jun','Jul','Aug','Sep','Oct'],
-            values: [3180, 3250, 3325, 3400, 3510, 3600, 3720]
+        const production2005to2024 = {
+            labels: Array.from({length:20}, (_,i)=>2005+i),
+            area: [/* sample area data */ 500,510,520,530,540,550,560,570,580,590,600,610,620,633,640,645,650,655,660,670],
+            yield: [1.1,1.12,1.15,1.14,1.16,1.18,1.19,1.21,1.22,1.23,1.25,1.26,1.27,1.28,1.30,1.32,1.33,1.35,1.36,1.38],
+            production: [550,570,598,606,626,649,678,690,708,725,750,770,790,810,832,851,867,887,899,920]
         };
 
-        const marketShare = {
-            labels: ['EU','USA','Japan','Russia','Others'],
-            values: [38, 27, 14, 6, 15]
-        };
-
-        const productionByYear = {
-            labels: ['2019','2020','2021','2022','2023','2024','2025'],
-            values: [1750, 1680, 1820, 1900, 1860, 1930, 1980]
-        };
-
-        // --- News Rendering ---
-        const newsGrid = document.getElementById('newsGrid');
-        const searchInput = document.getElementById('searchInput');
-        const tagFilter = document.getElementById('tagFilter');
-        const lastUpdate = document.getElementById('lastUpdate');
-        const numArticles = document.getElementById('numArticles');
-
-        function renderNews(items) {
-            newsGrid.innerHTML = '';
-            const sorted = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
-            sorted.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card news-card';
-                card.innerHTML = `
-                    <div class="news-meta">${new Date(item.date).toLocaleDateString()}</div>
-                    <div class="news-title">${item.title}</div>
-                    <div class="news-summary">${item.summary}</div>
-                    <div class="news-tags">${item.tags.map(t => `<span class="chip">${t}</span>`).join(' ')}</div>
-                `;
-                newsGrid.appendChild(card);
-            });
-            numArticles.textContent = items.length;
-            lastUpdate.textContent = new Date().toLocaleDateString();
-        }
-
-        function filterNews() {
-            const q = (searchInput.value || '').toLowerCase();
-            const tag = tagFilter.value;
-            const filtered = newsItems.filter(n => {
-                const matchesText = !q || `${n.title} ${n.summary}`.toLowerCase().includes(q);
-                const matchesTag = !tag || n.tags.includes(tag);
-                return matchesText && matchesTag;
-            });
-            renderNews(filtered);
-        }
-
-        searchInput.addEventListener('input', filterNews);
-        tagFilter.addEventListener('change', filterNews);
-
-        // --- Charts ---
-        function formatUsdTon(v) { return `$${v.toLocaleString()}/t`; }
-
-        const priceCtx = document.getElementById('priceChart');
-        const priceChart = new Chart(priceCtx, {
-            type: 'line',
-            data: {
-                labels: priceSeries.labels,
-                datasets: [{
-                    label: 'Robusta (USD/ton)',
-                    data: priceSeries.values,
-                    borderColor: 'rgba(139,92,246,1)',
-                    backgroundColor: 'rgba(139,92,246,0.2)',
-                    tension: 0.3,
-                    fill: true,
-                    pointRadius: 3
-                }]
+        // --- Market Overview Chart (multi-line) ---
+        const marketCtx = document.getElementById('marketOverviewChart');
+        const marketChart = new Chart(marketCtx, {
+            type:'line',
+            data:{
+                labels: samplePrices.labels,
+                datasets:[
+                    {label:'Robusta (USD/t)',data:samplePrices.robusta,borderColor:'#7a4b2d',backgroundColor:'rgba(122,75,45,0.12)',tension:0.25,fill:true},
+                    {label:'Arabica (USD/t)',data:samplePrices.arabica,borderColor:'#b88b4a',backgroundColor:'rgba(184,139,74,0.12)',tension:0.25,fill:true},
+                    {label:'Domestic (USD/t)',data:samplePrices.domestic,borderColor:'#6b4a3a',backgroundColor:'rgba(107,74,58,0.06)',tension:0.25,fill:false}
+                ]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: { label: (ctx) => formatUsdTon(ctx.parsed.y) } }
-                },
-                scales: {
-                    y: { ticks: { callback: (v) => `$${v}` }, grid: { color: 'rgba(255,255,255,0.06)' } },
-                    x: { grid: { display: false } }
-                }
-            }
+            options:{responsive:true,plugins:{legend:{labels:{color: 'rgba(255,255,255,0.85)'}}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.03)'}}}
         });
 
-        const marketCtx = document.getElementById('marketShareChart');
-        const marketChart = new Chart(marketCtx, {
+        // Populate KPI values
+    document.getElementById('kpiRobusta').textContent = '$' + samplePrices.robusta[samplePrices.robusta.length - 1] + '/t';
+    document.getElementById('kpiArabica').textContent = '$' + samplePrices.arabica[samplePrices.arabica.length - 1] + '/t';
+    const weekChange = ((samplePrices.robusta[samplePrices.robusta.length - 1]-samplePrices.robusta[samplePrices.robusta.length - 8])/samplePrices.robusta[samplePrices.robusta.length - 8])*100;
+        document.getElementById('kpi7d').textContent = (weekChange>0?'+':'') + weekChange.toFixed(1) + '%';
+
+        // --- Export Pie ---
+        const pieCtx = document.getElementById('exportPie');
+        const pieChart = new Chart(pieCtx, {
             type: 'doughnut',
             data: {
-                labels: marketShare.labels,
-                datasets: [{
-                    data: marketShare.values,
-                    backgroundColor: ['#8b5cf6','#22c55e','#06b6d4','#f59e0b','#64748b'],
-                    borderWidth: 0
-                }]
+                labels: exportShare.labels,
+                datasets: [{ data: exportShare.values, backgroundColor: ['#b88b4a','#7a4b2d','#8b5e3a','#6b4a3a','#4b3a2a'] }]
             },
             options: {
-                plugins: { legend: { position: 'bottom', labels: { color: '#d1d5db' } } }
+                plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.8)' } } }
             }
         });
 
-        const productionCtx = document.getElementById('productionChart');
-        const productionChart = new Chart(productionCtx, {
-            type: 'bar',
+        // Top importers list
+        const topList = document.getElementById('topImporters');
+        topImporters.forEach(i=>{const li=document.createElement('li');li.textContent=`${i.country} — ${i.share}%`;topList.appendChild(li)});
+
+        // --- Map (Leaflet) - show exporters/importers markers ---
+        const map = L.map('exportMap',{scrollWheelZoom:false}).setView([14.0583,108.2772],5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(map);
+
+        const importerMarkers = [
+            {lat:51.1657,lon:10.4515,country:'Germany',share:12},
+            {lat:38.9072,lon:-77.0369,country:'USA',share:9},
+            {lat:36.2048,lon:138.2529,country:'Japan',share:7},
+            {lat:35.8617,lon:104.1954,country:'China',share:6},
+            {lat:40.4637,lon:-3.7492,country:'Spain',share:5}
+        ];
+
+        importerMarkers.forEach(m=>{
+            const circle = L.circleMarker([m.lat,m.lon],{radius:6 + m.share/2,color:'#b88b4a',fillColor:'#b88b4a',fillOpacity:0.8}).addTo(map);
+            circle.bindPopup(`<strong>${m.country}</strong><br/>Share: ${m.share}%`);
+        });
+
+        // --- Production Trends chart ---
+        const prodCtx = document.getElementById('productionTrends');
+        const prodChart = new Chart(prodCtx, {
+            type: 'line',
             data: {
-                labels: productionByYear.labels,
+                labels: production2005to2024.labels,
                 datasets: [{
                     label: 'Production (k tons)',
-                    data: productionByYear.values,
-                    backgroundColor: 'rgba(34,197,94,0.6)',
-                    borderColor: 'rgba(34,197,94,1)',
-                    borderWidth: 1,
-                    borderRadius: 6
+                    data: production2005to2024.production,
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34,197,94,0.12)',
+                    tension: 0.2,
+                    fill: true
                 }]
             },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { grid: { color: 'rgba(255,255,255,0.06)' } },
-                    x: { grid: { display: false } }
-                }
-            }
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' } } } }
         });
 
-        // Highlights
-        const priceHighlights = document.getElementById('priceHighlights');
-        const last = priceSeries.values[priceSeries.values.length - 1];
-        const first = priceSeries.values[0];
-        const change = last - first;
-        const pct = (change / first) * 100;
-        priceHighlights.innerHTML = `
-            <li><strong>Latest</strong>: ${formatUsdTon(last)}</li>
-            <li><strong>Change (period)</strong>: ${change > 0 ? '+' : ''}${change} USD/t (${pct.toFixed(1)}%)</li>
-            <li><strong>High</strong>: ${formatUsdTon(Math.max(...priceSeries.values))}</li>
-            <li><strong>Low</strong>: ${formatUsdTon(Math.min(...priceSeries.values))}</li>
-        `;
+        // --- AI Forecast chart (extend last known price) ---
+        const aiCtx = document.getElementById('aiForecastChart');
+        // create forecasted points (simple linear + noise) for demo
+        const real = samplePrices.robusta.slice(-8);
+        const labels = ['-7d','-6d','-5d','-4d','-3d','-2d','-1d','Today','+7d','+14d','+21d'];
+        const forecast = [...real, real.at(-1)+40, real.at(-1)+80, real.at(-1)+130];
+        const aiChart = new Chart(aiCtx,{type:'line',data:{labels:labels,datasets:[{label:'Observed',data:[...real],borderColor:'#7a4b2d',tension:0.25,pointRadius:3,fill:false},{label:'AI Forecast',data:forecast,borderDash:[6,6],borderColor:'#b88b4a',tension:0.25,pointStyle:'rect',pointRadius:3,fill:false}]},options:{responsive:true,plugins:{legend:{labels:{color:'rgba(255,255,255,0.9)'}}},scales:{y:{grid:{color:'rgba(255,255,255,0.03)'}}}}});
 
-        // Initial render
-        renderNews(newsItems);
+        // --- News (sample cards) ---
+        const newsData = [
+            {title:'Vietnam robusta prices climb amid tighter supply',date:'2025-10-22',img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=4b7eaad3e3a7b2c6c8d7f8f0c6d3a2e1',summary:'Exporters report lower available stocks.'},
+            {title:'Producers adapt to changing rains in Dak Lak',date:'2025-10-19',img:'https://images.unsplash.com/photo-1491663894619-1d5b6f6f0c31?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=8f0b6c5c5e6f7e8d9f0a1b2c3d4e5f6a',summary:'Farmers shift planting calendars and irrigation strategies.'},
+            {title:'Logistics costs slowly normalize for shipments',date:'2025-10-18',img:'https://images.unsplash.com/photo-1520975919658-3f5a8f4f6a26?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=a1b2c3d4e5f67890123456789abcdef0',summary:'Freight improvements help margins.'}
+        ];
+        const newsGrid = document.getElementById('newsGrid');
+        newsData.forEach(n=>{
+            const d=document.createElement('div');d.className='news-item card';
+            d.innerHTML=`<img src="${n.img}" alt="${n.title}"><div class="news-meta">${n.date}</div><div class="news-title">${n.title}</div><div style="color:var(--muted);font-size:13px">${n.summary}</div><div style="margin-top:8px"><a href="#">Read more</a></div>`;
+            newsGrid.appendChild(d);
+        });
+
+        // --- Contact form handler (client-only demo) ---
+        const contactForm = document.getElementById('contactForm');
+        const contactMsg = document.getElementById('contactMsg');
+        contactForm.addEventListener('submit', (e)=>{
+            e.preventDefault();
+            const fd = new FormData(contactForm);
+            const name = fd.get('name');
+            contactMsg.textContent = `Thanks ${name || ''}! Message received locally (demo).`; 
+            contactForm.reset();
+        });
+
+        // Smooth scroll for Explore button
+        document.getElementById('exploreBtn').addEventListener('click', ()=>{
+            document.getElementById('market-overview').scrollIntoView({behavior:'smooth'});
+        });
+
+        // Simple fade-in on scroll
+        const observer = new IntersectionObserver((entries)=>{
+            entries.forEach(e=>{ if(e.isIntersecting) e.target.style.opacity=1; });
+        },{threshold:0.12});
+        document.querySelectorAll('section .card, .news-item, .hero-left, .hero-right').forEach(el=>{el.style.opacity=0;el.style.transition='opacity .9s ease-out';observer.observe(el)});
+
     </script>
 </body>
 </html>
