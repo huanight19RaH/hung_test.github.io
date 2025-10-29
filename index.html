@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coffee Database Project</title>
+    <meta name="description" content="Coffee data collection, scraping, processing, and analysis system (ADY 201)." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f1115;
+            --card: #151823;
+            --muted: #9aa4b2;
+            --text: #e6e9ef;
+            --accent: #8b5cf6; /* violet */
+            --accent-2: #22c55e; /* green */
+            --border: #232836;
+            --chip: #1f2430;
+        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            margin: 0;
+            font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            background: radial-gradient(1200px 800px at 80% -10%, rgba(139,92,246,0.12), transparent 60%),
+                        radial-gradient(1000px 700px at -10% 10%, rgba(34,197,94,0.10), transparent 60%),
+                        var(--bg);
+            line-height: 1.6;
+        }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .container { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+        /* Header */
+        header {
+            position: sticky; top: 0; z-index: 10;
+            backdrop-filter: saturate(180%) blur(8px);
+            background: linear-gradient(to bottom, rgba(15,17,21,0.9), rgba(15,17,21,0.6));
+            border-bottom: 1px solid var(--border);
+        }
+        .nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+        .brand { display: flex; gap: 10px; align-items: center; font-weight: 700; }
+        .brand-badge { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; font-weight: 800; }
+        nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 14px; margin: 0; padding: 0; }
+        nav a { color: var(--text); padding: 8px 10px; border-radius: 8px; }
+        nav a:hover { background: var(--chip); text-decoration: none; }
+
+        /* Hero */
+        .hero { padding: 56px 0 24px; text-align: center; }
+        .hero h1 { margin: 0 0 12px; font-size: 42px; line-height: 1.1; letter-spacing: -0.02em; }
+        .hero p { margin: 0 auto; max-width: 780px; color: var(--muted); font-size: 18px; }
+        .chips { margin-top: 18px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .chip { padding: 6px 12px; border: 1px solid var(--border); background: var(--chip); border-radius: 999px; color: var(--muted); font-size: 13px; }
+
+        /* Sections */
+        section { padding: 28px 0; }
+        .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+        .col-4 { grid-column: span 4; }
+        .col-8 { grid-column: span 8; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+        h2 { margin: 0 0 10px; font-size: 22px; }
+        h3 { margin: 14px 0 8px; font-size: 16px; color: var(--muted); font-weight: 600; }
+        ul { margin: 8px 0 0 18px; }
+        code, pre { background: #0b0d12; color: #dbe1ea; border: 1px solid var(--border); border-radius: 10px; }
+        code { padding: 2px 6px; }
+        pre { padding: 12px; overflow: auto; }
+
+        .kpi { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+        .kpi .item { background: var(--chip); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+        .kpi .label { color: var(--muted); font-size: 12px; }
+        .kpi .value { font-weight: 700; font-size: 18px; }
+
+        .footer { padding: 28px 0 40px; color: var(--muted); text-align: center; border-top: 1px solid var(--border); margin-top: 28px; }
+
+        @media (max-width: 900px) {
+            .col-4, .col-8 { grid-column: span 12; }
+            .hero h1 { font-size: 34px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container nav">
+            <div class="brand">
+                <div class="brand-badge">☕</div>
+                <div>Coffee Database</div>
+            </div>
+            <nav aria-label="Primary">
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#usage">Usage</a></li>
+                    <li><a href="#components">Components</a></li>
+                    <li><a href="#schema">Schema</a></li>
+                    <li><a href="#sources">Sources</a></li>
+                    <li><a href="#requirements">Requirements</a></li>
+                    <li><a href="#authors">Authors</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="overview">
+            <div class="container">
+                <h1>Coffee Data Collection & Analysis</h1>
+                <p>A comprehensive system for scraping coffee prices, transforming CSV datasets, syncing to MySQL, and exploring the Vietnamese coffee market via notebooks and scripts.</p>
+                <div class="chips">
+                    <span class="chip">Beautiful Soup</span>
+                    <span class="chip">Selenium</span>
+                    <span class="chip">MySQL (Aiven)</span>
+                    <span class="chip">Jupyter EDA</span>
+                    <span class="chip">Vietnam Market</span>
+                </div>
+                <div class="kpi">
+                    <div class="item"><div class="label">Project</div><div class="value">ADY 201</div></div>
+                    <div class="item"><div class="label">Focus</div><div class="value">Scrape → Process → Analyze</div></div>
+                    <div class="item"><div class="label">DB</div><div class="value">MySQL</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features">
+            <div class="container grid">
+                <div class="col-4">
+                    <div class="card">
+                        <h2>Features</h2>
+                        <ul>
+                            <li>Multiple scraping approaches</li>
+                            <li>Automated MySQL sync</li>
+                            <li>Processing pipelines</li>
+                            <li>Fallback data generation</li>
+                            <li>EDA with notebooks</li>
+                            <li>Error handling & validation</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-8">
+                    <div class="card">
+                        <h2>Project Structure</h2>
+                        <pre><code>coffee_dabase/
+├─ Data Files (CSV)
+├─ Web Scrapers (BS4, Selenium)
+├─ Database Sync (scripts, notebooks)
+├─ Analysis Notebooks (EDA)
+├─ Testing (pytest style)
+└─ Documentation (README, VN guide)
+                        </code></pre>
+                        <h3>Data Highlights</h3>
+                        <ul>
+                            <li>Prices from giacaphe.com</li>
+                            <li>Production, weather, export statistics</li>
+                            <li>Market trade by importer country</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="usage">
+            <div class="container grid">
+                <div class="col-8">
+                    <div class="card">
+                        <h2>Usage</h2>
+                        <h3>Web Scraping</h3>
+                        <pre><code># Simple (Beautiful Soup)
+python coffee_price_scraper.py
+
+# Selenium (Cloudflare)
+python coffee_price_scraper_selenium.py
+
+# Complete with fallback
+python coffee_price_scraper_final.py
+                        </code></pre>
+                        <p>Scrapers attempt to fetch latest prices, persist CSVs with timestamps, and generate fallback data when necessary.</p>
+                        <h3>Database Sync</h3>
+                        <pre><code>python sync_coffee.py
+                        </code></pre>
+                        <p>Reads CSVs, transforms wide→long, creates/updates tables, and upserts into MySQL.</p>
+                        <h3>Analysis</h3>
+                        <pre><code>jupyter notebook eda_data_coffee.ipynb
+jupyter notebook main_coffee.ipynb
+                        </code></pre>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card">
+                        <h2>Setup</h2>
+                        <h3>Prerequisites</h3>
+                        <ul>
+                            <li>Python 3.8+</li>
+                            <li>MySQL / Aiven MySQL</li>
+                            <li>Chrome + ChromeDriver</li>
+                        </ul>
+                        <h3>Install</h3>
+                        <pre><code>pip install pandas pymysql sqlalchemy 
+beautifulsoup4 selenium requests 
+webdriver-manager python-dotenv
+                        </code></pre>
+                        <h3>.env</h3>
+                        <pre><code>HOST=your-host
+PORT=3306
+USER=your-user
+PASSWORD=your-pass
+DB=your-db
+CA_PEM=/path/to/ca.pem
+                        </code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="components">
+            <div class="container grid">
+                <div class="col-4">
+                    <div class="card">
+                        <h2>Scrapers</h2>
+                        <ul>
+                            <li><code>coffee_price_scraper_final.py</code> – robust, fallback, timestamps</li>
+                            <li><code>coffee_price_scraper_selenium.py</code> – bypass Cloudflare</li>
+                            <li><code>coffee_price_scraper.py</code> – simple BS4</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card">
+                        <h2>Processing</h2>
+                        <ul>
+                            <li><code>sync_coffee.py</code> – wide→long, normalize, upsert</li>
+                            <li><code>unprocessing_sql.py</code> – raw processing</li>
+                            <li><code>main_coffee.ipynb</code> – DB ops</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card">
+                        <h2>Testing & Docs</h2>
+                        <ul>
+                            <li><code>test_scraper.py</code>, <code>test_selenium.py</code></li>
+                            <li>README + Vietnamese guide</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="schema">
+            <div class="container">
+                <div class="card">
+                    <h2>Database Schema</h2>
+                    <div class="grid">
+                        <div class="col-4">
+                            <h3>coffee_long</h3>
+                            <ul>
+                                <li>hang_muc</li>
+                                <li>year</li>
+                                <li>value</li>
+                            </ul>
+                        </div>
+                        <div class="col-4">
+                            <h3>weather</h3>
+                            <ul>
+                                <li>year</li>
+                                <li>temperature</li>
+                                <li>humidity</li>
+                                <li>rain</li>
+                            </ul>
+                        </div>
+                        <div class="col-4">
+                            <h3>production</h3>
+                            <ul>
+                                <li>year</li>
+                                <li>area_thousand_ha</li>
+                                <li>output_tons</li>
+                                <li>export_tons</li>
+                            </ul>
+                        </div>
+                        <div class="col-4">
+                            <h3>coffee_export</h3>
+                            <ul>
+                                <li>year</li>
+                                <li>export_value_million_usd</li>
+                                <li>price_world_usd_per_ton</li>
+                                <li>price_vn_usd_per_ton</li>
+                            </ul>
+                        </div>
+                        <div class="col-4">
+                            <h3>market_trade</h3>
+                            <ul>
+                                <li>importer</li>
+                                <li>year</li>
+                                <li>trade_value_million_usd</li>
+                                <li>quantity_tons</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sources">
+            <div class="container grid">
+                <div class="col-6 col-8">
+                    <div class="card">
+                        <h2>Data Sources</h2>
+                        <ul>
+                            <li>Coffee prices: scraped from <code>giacaphe.com</code> (with fallback)</li>
+                            <li>Production, weather, export: <code>Data_coffee.csv</code></li>
+                            <li>Market trade by importer: <code>Thi_phan_3_thi_truong_chinh.csv</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card">
+                        <h2>Requirements</h2>
+                        <ul>
+                            <li>pandas, pymysql, sqlalchemy</li>
+                            <li>beautifulsoup4, selenium, requests</li>
+                            <li>webdriver-manager, python-dotenv</li>
+                            <li>(Notebooks) jupyter, ipykernel</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="requirements">
+            <div class="container">
+                <div class="card">
+                    <h2>Configuration Notes</h2>
+                    <ul>
+                        <li>Update CSV paths in <code>sync_coffee.py</code>, <code>main_coffee.ipynb</code>, <code>unprocessing_sql.py</code>.</li>
+                        <li>MySQL connection via <code>.env</code>; ensure <code>utf8mb4</code> charset.</li>
+                        <li>ChromeDriver is auto-managed; configure headless/timeouts if needed.</li>
+                        <li>For Aiven MySQL, provide <code>CA_PEM</code> certificate path.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="authors">
+            <div class="container">
+                <div class="card">
+                    <h2>Authors & License</h2>
+                    <p><strong>ADY 201 - Team 7</strong></p>
+                    <p>Educational project for coursework. Some sources may require attribution for commercial use.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div>© <span id="year"></span> Coffee Database. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
+
+
